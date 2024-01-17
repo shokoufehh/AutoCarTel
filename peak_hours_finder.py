@@ -92,16 +92,16 @@ class PeakHoursFinder:
         
     def create_map(self):
         location_data = self.read_location_data()
-        df_locations = location_data.groupby(['latitude', 'longitude', 'timestamp']).sum().reset_index()
+        locations = location_data.groupby(['latitude', 'longitude', 'timestamp']).sum().reset_index()
 
-        m = folium.Map([df_locations.latitude.mean(), df_locations.longitude.mean()], zoom_start=11)
-        for index, row in df_locations.iterrows():
+        m = folium.Map([locations.latitude.mean(), locations.longitude.mean()], zoom_start=11)
+        for index, row in locations.iterrows():
             folium.CircleMarker([row['latitude'], row['longitude']],
                                 radius=row['total_cars'] * 6,
                                 fill_color="#3db7e4", 
                             ).add_to(m)
             
-        points = df_locations[['latitude', 'longitude']].as_matrix()
+        points = locations[['latitude', 'longitude']].as_matrix()
         m.add_children(HeatMap(points, radius=15)) # plot heatmap
         
         return m
