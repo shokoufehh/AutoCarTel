@@ -92,16 +92,21 @@ class PeakHoursFinder:
         
     def create_map(self):
         location_data = self.read_location_data()
-        locations = location_data.groupby(['latitude', 'longitude', 'timestamp']).sum().reset_index()
 
-        m = folium.Map([locations.latitude.mean(), locations.longitude.mean()], zoom_start=11)
-        for index, row in locations.iterrows():
-            folium.CircleMarker([row['latitude'], row['longitude']],
-                                radius=row['total_cars'] * 6,
-                                fill_color="#3db7e4", 
-                            ).add_to(m)
-            
-        points = locations[['latitude', 'longitude']].as_matrix()
-        m.add_children(HeatMap(points, radius=15)) # plot heatmap
-        
-        return m
+        if location_data is not None:
+            locations = location_data.groupby(['latitude', 'longitude', 'timestamp']).sum().reset_index()
+
+            m = folium.Map([locations.latitude.mean(), locations.longitude.mean()], zoom_start=11)
+            for index, row in locations.iterrows():
+                folium.CircleMarker([row['latitude'], row['longitude']],
+                                    radius=row['total_cars'] * 6,
+                                    fill_color="#3db7e4", 
+                                ).add_to(m)
+                
+            points = locations[['latitude', 'longitude']].values
+            m.add_child(HeatMap(points, radius=15))  # plot heatmap
+
+            return m
+        else:
+            print("No location data available.")
+            return None
