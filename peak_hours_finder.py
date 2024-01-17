@@ -24,7 +24,7 @@ class PeakHoursFinder:
             required_columns = ['latitude', 'longitude', 'timestamp']
 
             if all(col in data.columns for col in required_columns):
-                location_data = data[required_columns]
+                location_data = data
             else:
                 # manage other names of columns available columns
                 possible_columns = ['lat', 'lon', 'time', 'latitudes', 'longitudes', 'timestamps']
