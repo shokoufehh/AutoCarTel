@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import warnings
-
+import folium
+from folium.plugins import HeatMap
 warnings.filterwarnings("ignore")
 
 
@@ -89,18 +90,18 @@ class PeakHoursFinder:
         else:
             print("No data available.")
         
-    # def create_peak_hours_plot(self):
-    #     peak_hours = self.find_peak_hours()
-    #     location_data = self.read_location_data()
-    #     location_data['timestamp'] = pd.to_datetime(location_data['timestamp']) 
-    #     location_data['hour'] = location_data['timestamp'].dt.hour
-    #     if peak_hours is not None:
-    #         plt.figure(figsize=(10, 6))
-    #         plt.bar(peak_hours, height=location_data['hour'].value_counts().loc[peak_hours].sort_index().values)
-    #         plt.xlabel('Hour of Day')
-    #         plt.ylabel('Frequency')
-    #         plt.title('Peak Hours Distribution')
-    #         plt.show()
-    #     else:
-    #         print("No peak hours found or error in data.")
-    
+    def create_map(self):
+        location_data = self.read_location_data()
+        df_locations = location_data.groupby(['latitude', 'longitude', 'timestamp']).sum().reset_index()
+
+        m = folium.Map([df_locations.latitude.mean(), df_locations.longitude.mean()], zoom_start=11)
+        for index, row in df_locations.iterrows():
+            folium.CircleMarker([row['latitude'], row['longitude']],
+                                radius=row['total_cars'] * 6,
+                                fill_color="#3db7e4", 
+                            ).add_to(m)
+            
+        points = df_locations[['latitude', 'longitude']].as_matrix()
+        m.add_children(HeatMap(points, radius=15)) # plot heatmap
+        
+        return m
